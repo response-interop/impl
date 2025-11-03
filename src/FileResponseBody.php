@@ -1,0 +1,63 @@
+<?php
+declare(strict_types=1);
+
+namespace ResponseInterop\Impl;
+
+use ResponseInterop\Interface\ResponseBodyContent;
+use ResponseInterop\Interface\ResponseStruct;
+use ResponseInterop\Interface\ResponseTypeAliases;
+use SplFileObject;
+
+/**
+ * @phpstan-import-type response_header_value_string from ResponseTypeAliases
+ */
+class FileResponseBody implements ResponseBodyContent
+{
+    /**
+     * @param ?response_header_value_string $type
+     * @param ?response_header_value_string $encoding
+     * @param ?response_header_value_string $disposition
+     * @param ?response_header_value_string $filename
+     */
+    public function __construct(
+        public SplFileObject $file,
+        public ?string $type = null,
+        public ?string $encoding = null,
+        public ?string $disposition = null,
+        public ?string $filename = null,
+    ) {
+    }
+
+    public function prepareResponse(ResponseStruct $response) : void
+    {
+        $response->headers->setHeader(
+            'content-type',
+            $this->type ?? 'application/octet-stream',
+        );
+
+        $response->headers->setHeader(
+            'content-transfer-encoding',
+            $this->encoding ?? 'binary',
+        );
+
+        $disposition = $this->disposition ?? 'attachment';
+        $filename = rawurlencode($this->filename ?? $this->file->getFilename());
+
+        $response->headers->setHeader(
+            'content-disposition',
+            "{$disposition}; filename=\"{$filename}\"",
+        );
+
+        $size = (string) $this->file->getSize();
+
+        if ($size !== '') {
+            $response->headers->setHeader('content-length', $size);
+        }
+    }
+
+    public function sendResponseBody() : void
+    {
+        $this->file->rewind();
+        $this->file->fpassthru();
+    }
+}
