@@ -19,11 +19,6 @@ use ResponseInterop\Interface\ResponseTypeAliases;
  */
 class ResponseHeaders implements ResponseHeadersCollection
 {
-    public function __construct(
-        protected ResponseCookieHelper $cookieHelper = new ResponseCookieHelper(),
-    ) {
-    }
-
     /**
      * @var array<
      *     response_header_field_string,
@@ -36,6 +31,11 @@ class ResponseHeaders implements ResponseHeadersCollection
      * @var array<response_cookie_name_string,response_cookie_array>
      */
     protected array $cookies = [];
+
+    public function __construct(
+        protected ResponseCookieHelper $cookieHelper = new ResponseCookieHelper(),
+    ) {
+    }
 
     /**
      * @inheritdoc
@@ -243,21 +243,6 @@ class ResponseHeaders implements ResponseHeadersCollection
     {
         $this->cookies = [];
         $this->unsetHeader('set-cookie');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function sendResponseHeaders() : void
-    {
-        foreach ($this->getHeaders() as $field => $values) {
-            foreach ((array) $values as $value) {
-                header(
-                    header: "{$field}: {$value}",
-                    replace: false,
-                );
-            }
-        }
     }
 
     protected function normalizeField(string &$field) : void

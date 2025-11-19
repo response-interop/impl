@@ -3,15 +3,16 @@ declare(strict_types=1);
 
 namespace ResponseInterop\Impl;
 
-use ResponseInterop\Interface\ResponseBodyContent;
+use ResponseInterop\Interface\ResponseBodyHandler;
 use ResponseInterop\Interface\ResponseStruct;
 use ResponseInterop\Interface\ResponseTypeAliases;
 use SplFileObject;
+use StreamInterop\Interface\ResourceStream;
 
 /**
  * @phpstan-import-type response_header_value_string from ResponseTypeAliases
  */
-class FileResponseBody implements ResponseBodyContent
+class FileResponseBody implements ResponseBodyHandler
 {
     /**
      * @param ?response_header_value_string $type
@@ -28,6 +29,9 @@ class FileResponseBody implements ResponseBodyContent
     ) {
     }
 
+    /**
+     * @inheritdoc
+     */
     public function prepareResponse(ResponseStruct $response) : void
     {
         $response->headers->setHeader(
@@ -55,9 +59,14 @@ class FileResponseBody implements ResponseBodyContent
         }
     }
 
-    public function sendResponseBody() : void
+    /**
+     * @inheritdoc
+     */
+    public function sendResponseBody(ResourceStream $output) : void
     {
-        $this->file->rewind();
-        $this->file->fpassthru();
+        $content = fopen($this->file->getPathName(), 'rb');
+        assert(is_resource($content));
+        stream_copy_to_stream($content, $output->resource);
+        fclose($content);
     }
 }

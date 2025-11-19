@@ -3,10 +3,11 @@ declare(strict_types=1);
 
 namespace ResponseInterop\Impl;
 
-use ResponseInterop\Interface\ResponseBodyContent;
+use ResponseInterop\Interface\ResponseBodyHandler;
 use ResponseInterop\Interface\ResponseStruct;
+use StreamInterop\Interface\ResourceStream;
 
-class JsonResponseBody implements ResponseBodyContent
+class JsonResponseBody implements ResponseBodyHandler
 {
     public const int DEFAULT_FLAGS = JSON_HEX_TAG
         | JSON_HEX_APOS
@@ -27,6 +28,9 @@ class JsonResponseBody implements ResponseBodyContent
     ) {
     }
 
+    /**
+     * @inheritdoc
+     */
     public function prepareResponse(ResponseStruct $response) : void
     {
         $response->headers->setHeader(
@@ -35,12 +39,18 @@ class JsonResponseBody implements ResponseBodyContent
         );
     }
 
-    public function sendResponseBody() : void
+    /**
+     * @inheritdoc
+     */
+    public function sendResponseBody(ResourceStream $output) : void
     {
-        echo json_encode(
-            $this->data,
-            $this->flags ?? static::DEFAULT_FLAGS,
-            $this->depth ?? 512,
+        fwrite(
+            $output->resource,
+            (string) json_encode(
+                $this->data,
+                $this->flags ?? static::DEFAULT_FLAGS,
+                $this->depth ?? 512,
+            )
         );
     }
 }

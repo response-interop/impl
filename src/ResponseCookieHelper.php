@@ -66,8 +66,8 @@ class ResponseCookieHelper implements ResponseCookieHelperService
 
         // 6.  The cookie-name is the name string, and the cookie-value is the
         // value string.
-        $cookie['name'] = $name;
-        $cookie['value'] = $value;
+        $cookie['name'] = $this->decode($name);
+        $cookie['value'] = $this->decode($value);
 
         // The user agent MUST use an algorithm equivalent to the following
         // algorithm to parse the unparsed-attributes:
@@ -157,7 +157,9 @@ class ResponseCookieHelper implements ResponseCookieHelperService
      */
     public function composeResponseCookieString(array $cookie) : string
     {
-        $setCookieString = $cookie['name'] . '=' . $cookie['value'];
+        $setCookieString = $this->encode($cookie['name'])
+            . '='
+            . $this->encode($cookie['value']);
 
         foreach ($cookie['attributes'] as $attributeName => $attributeValue) {
             $setCookieString .= "; {$attributeName}";
@@ -168,5 +170,15 @@ class ResponseCookieHelper implements ResponseCookieHelperService
         }
 
         return $setCookieString;
+    }
+
+    protected function decode(string $string) : string
+    {
+        return urldecode($string);
+    }
+
+    protected function encode(string $string) : string
+    {
+        return urlencode($string);
     }
 }

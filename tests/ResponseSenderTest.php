@@ -1,0 +1,110 @@
+<?php
+declare(strict_types=1);
+
+namespace ResponseInterop\Impl;
+
+use SplFileObject;
+use StreamInterop\Interface\ResourceStream;
+
+class ResponseSenderTest extends \PHPUnit\Framework\TestCase
+{
+    private FakeResponseSender $responseSender;
+
+    protected function setUp() : void
+    {
+        $this->responseSender = new FakeResponseSender();
+    }
+
+    protected function tearDown() : void
+    {
+        unset($this->responseSender);
+    }
+
+    protected function send(Response $response) : void
+    {
+        $this->responseSender->sendResponse(
+            $response,
+            new ResponseStream('php://memory', 'wb+')
+        );
+    }
+
+    public function testHttp2Response() : void
+    {
+        $response = new Response();
+        $response->httpVersion = '2';
+        $response->statusCode = 404;
+        $response->body = "Not found.";
+        $this->send($response);
+
+        $this->assertHeaders([
+            ['HTTP/2 404', true, 404],
+            [':status: 404', true, 0],
+        ]);
+
+        $this->assertBody('Not found.');
+    }
+
+    public function testStringResponse() : void
+    {
+        $response = new Response();
+        $response->headers->setHeader('content-type', 'text/plain');
+        $response->body = "Hello world!";
+        $this->send($response);
+
+        $this->assertHeaders([
+            ['HTTP/1.1 200', true, 200],
+            ['content-type: text/plain', false, 0],
+        ]);
+
+        $this->assertBody('Hello world!');
+    }
+
+    public function testJsonResponse() : void
+    {
+        $response = new Response();
+        $response->body = new JsonResponseBody(['hello' => 'world']);
+        $this->send($response);
+
+        $this->assertHeaders([
+            ['HTTP/1.1 200', true, 200],
+            ['content-type: application/json', false, 0],
+        ]);
+
+        $this->assertBody('{"hello":"world"}');
+    }
+
+    public function testFileResponse() : void
+    {
+        $file = new SplFileObject(__DIR__ . '/hello.txt');
+        $response = new Response();
+        $response->body = new FileResponseBody($file);
+        $this->send($response);
+
+        $this->assertHeaders([
+            ['HTTP/1.1 200', true, 200],
+            ['content-type: application/octet-stream', false, 0],
+            ['content-transfer-encoding: binary', false, 0],
+            ['content-disposition: attachment; filename="hello.txt"', false, 0],
+            ['content-length: 14', false, 0],
+        ]);
+
+        $expect = (string) file_get_contents($file->getPathName());
+        $this->assertBody($expect);
+    }
+
+    /**
+     * @param mixed[] $expect
+     */
+    protected function assertHeaders(array $expect) : void
+    {
+        $this->assertSame($this->responseSender->headersSent, $expect);
+    }
+
+    protected function assertBody(string $expect) : void
+    {
+        $resource = $this->responseSender->output->resource;
+        rewind($resource);
+        $actual = (string) stream_get_contents($resource);
+        $this->assertSame($expect, $actual);
+    }
+}

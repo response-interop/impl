@@ -5,8 +5,6 @@ namespace ResponseInterop\Impl;
 
 class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
 {
-    use ResponseAssertions;
-
     protected ResponseHeaders $headers;
 
     protected function setUp() : void
@@ -179,24 +177,6 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
     {
         $this->expectException(ResponseException::class);
         $this->headers->setHeader('foo', '    ');
-    }
-
-    public function testSendResponseHeaders() : void
-    {
-        $this->headers->setHeader('foo', 'foo');
-        $this->headers->setHeader('set-cookie', 'bar=baz');
-        $this->headers->setCookie('dib', 'zim');
-
-        FakeResponseFunctions::reset();
-        $this->headers->sendResponseHeaders();
-
-        $expect = [
-            ['foo: foo', false, 0],
-            ['set-cookie: bar=baz', false, 0],
-            ['set-cookie: dib=zim', false, 0],
-        ];
-
-        $this->assertSame($expect, FakeResponseFunctions::$headers);
     }
 
     public function testInvalidCookieString() : void

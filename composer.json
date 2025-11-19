@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": "^8.4",
-        "response-interop/interface": "0.x@dev"
+        "response-interop/interface": "1.x@dev"
     },
     "autoload": {
         "psr-4" : {
