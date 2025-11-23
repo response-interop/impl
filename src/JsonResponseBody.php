@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace ResponseInterop\Impl;
 
 use ResponseInterop\Interface\ResponseBodyHandler;
+use ResponseInterop\Interface\ResponseSenderService;
 use ResponseInterop\Interface\ResponseStruct;
-use StreamInterop\Interface\ResourceStream;
 
 class JsonResponseBody implements ResponseBodyHandler
 {
@@ -42,10 +42,9 @@ class JsonResponseBody implements ResponseBodyHandler
     /**
      * @inheritdoc
      */
-    public function sendResponseBody(ResourceStream $output) : void
+    public function sendResponseBody(ResponseSenderService $sender) : void
     {
-        fwrite(
-            $output->resource,
+        $sender->sendResponseBodyString(
             (string) json_encode(
                 $this->data,
                 $this->flags ?? static::DEFAULT_FLAGS,

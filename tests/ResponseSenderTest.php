@@ -12,20 +12,14 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp() : void
     {
-        $this->responseSender = new FakeResponseSender();
+        $this->responseSender = new FakeResponseSender(
+            output: fopen('php://memory', 'wb+'),
+        );
     }
 
     protected function tearDown() : void
     {
         unset($this->responseSender);
-    }
-
-    protected function send(Response $response) : void
-    {
-        $this->responseSender->sendResponse(
-            $response,
-            new ResponseStream('php://memory', 'wb+')
-        );
     }
 
     public function testHttp2Response() : void
@@ -34,7 +28,7 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
         $response->httpVersion = '2';
         $response->statusCode = 404;
         $response->body = "Not found.";
-        $this->send($response);
+        $this->responseSender->sendResponse($response);
 
         $this->assertHeaders([
             ['HTTP/2 404', true, 404],
@@ -49,7 +43,7 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
         $response = new Response();
         $response->headers->setHeader('content-type', 'text/plain');
         $response->body = "Hello world!";
-        $this->send($response);
+        $this->responseSender->sendResponse($response);
 
         $this->assertHeaders([
             ['HTTP/1.1 200', true, 200],
@@ -63,7 +57,7 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
     {
         $response = new Response();
         $response->body = new JsonResponseBody(['hello' => 'world']);
-        $this->send($response);
+        $this->responseSender->sendResponse($response);
 
         $this->assertHeaders([
             ['HTTP/1.1 200', true, 200],
@@ -78,7 +72,7 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
         $file = new SplFileObject(__DIR__ . '/hello.txt');
         $response = new Response();
         $response->body = new FileResponseBody($file);
-        $this->send($response);
+        $this->responseSender->sendResponse($response);
 
         $this->assertHeaders([
             ['HTTP/1.1 200', true, 200],
@@ -102,9 +96,9 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
 
     protected function assertBody(string $expect) : void
     {
-        $resource = $this->responseSender->output->resource;
-        rewind($resource);
-        $actual = (string) stream_get_contents($resource);
+        $output = $this->responseSender->output;
+        rewind($output);
+        $actual = (string) stream_get_contents($output);
         $this->assertSame($expect, $actual);
     }
 }

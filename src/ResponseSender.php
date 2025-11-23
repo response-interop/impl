@@ -6,14 +6,29 @@ namespace ResponseInterop\Impl;
 use ResponseInterop\Interface\ResponseBodyHandler;
 use ResponseInterop\Interface\ResponseSenderService;
 use ResponseInterop\Interface\ResponseStruct;
-use StreamInterop\Interface\ResourceStream;
+use Stringable;
 
 class ResponseSender implements ResponseSenderService
 {
-    public function sendResponse(
-        ResponseStruct $response,
-        ResourceStream $output = new ResponseStream(),
-    ) : void
+    /**
+     * @var resource
+     */
+    protected mixed $output;
+
+    /**
+     * @param null|false|resource $output
+     */
+    public function __construct(mixed $output = null)
+    {
+        $output ??= fopen('php://output', 'wb');
+        assert(is_resource($output));
+        $this->output = $output;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendResponse(ResponseStruct $response) : void
     {
         if ($response->body instanceof ResponseBodyHandler) {
             $response->body->prepareResponse($response);
@@ -21,7 +36,7 @@ class ResponseSender implements ResponseSenderService
 
         $this->sendResponseHeader(
             "HTTP/{$response->httpVersion} {$response->statusCode}",
-            response_code: $response->statusCode,
+            statusCode: $response->statusCode,
         );
 
         if ($response->httpVersion === '2') {
@@ -38,18 +53,75 @@ class ResponseSender implements ResponseSenderService
         }
 
         if ($response->body instanceof ResponseBodyHandler) {
-            $response->body->sendResponseBody($output);
+            $response->body->sendResponseBody($this);
         } else {
-            fwrite($output->resource, (string) $response->body);
+            $this->sendResponseBodyString($response->body);
         }
     }
 
+    /**
+     * @inheritdoc
+     */
     protected function sendResponseHeader(
         string $header,
         bool $replace = true,
-        int $response_code = 0
+        int $statusCode = 0
     ) : void
     {
-        header($header, $replace, $response_code);
+        header($header, $replace, $statusCode);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendResponseBodyString(string|Stringable $content) : void
+    {
+        fwrite($this->output, (string) $content);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendResponseBodyResource(
+        mixed $content,
+        ?int $length = null,
+        ?int $offset = null,
+    ) : int
+    {
+        if ($offset !== null) {
+            $this->seek($content, $offset);
+        }
+
+        $bytes = stream_copy_to_stream($content, $this->output, $length);
+
+        if ($bytes === false) {
+            throw new ResponseException(
+                "Could not write content resource to response resource."
+            );
+        }
+
+        return $bytes;
+    }
+
+    /**
+     * @param resource $content
+     */
+    protected function seek(mixed $content, int $offset) : void
+    {
+        $result = fseek($content, $offset);
+
+        if ($result === -1) {
+            throw new ResponseException(
+                "Could not seek to {$offset} on content resource."
+            );
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function flushResponse() : void
+    {
+        flush();
     }
 }

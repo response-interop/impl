@@ -15,23 +15,17 @@ class FakeResponseSender extends ResponseSender
      */
     public array $headersSent = [];
 
-    public ResourceStream $output;
+    public mixed $output;
 
-    public function sendResponse(
-        ResponseStruct $response,
-        ResourceStream $output = new ResponseStream(),
-    ) : void
-    {
-        $this->output = $output;
-        parent::sendResponse($response, $output);
-    }
-
-    protected function sendResponseHeader(
+    /**
+     * @inheritdoc
+     */
+    public function sendResponseHeader(
         string $header,
         bool $replace = true,
-        int $response_code = 0
+        int $statusCode = 0
     ) : void
     {
-        $this->headersSent[] = [$header, $replace, $response_code];
+        $this->headersSent[] = [$header, $replace, $statusCode];
     }
 }

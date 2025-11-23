@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace ResponseInterop\Impl;
 
 use ResponseInterop\Interface\ResponseBodyHandler;
+use ResponseInterop\Interface\ResponseSenderService;
 use ResponseInterop\Interface\ResponseStruct;
 use ResponseInterop\Interface\ResponseTypeAliases;
 use SplFileObject;
-use StreamInterop\Interface\ResourceStream;
 
 /**
  * @phpstan-import-type response_header_value_string from ResponseTypeAliases
@@ -62,11 +62,11 @@ class FileResponseBody implements ResponseBodyHandler
     /**
      * @inheritdoc
      */
-    public function sendResponseBody(ResourceStream $output) : void
+    public function sendResponseBody(ResponseSenderService $sender) : void
     {
         $content = fopen($this->file->getPathName(), 'rb');
         assert(is_resource($content));
-        stream_copy_to_stream($content, $output->resource);
+        $sender->sendResponseBodyResource($content);
         fclose($content);
     }
 }
