@@ -138,6 +138,41 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         $this->assertTrue($this->headers->hasCookie('bar'));
     }
 
+    public function testUnsetHeadersClearsCookies() : void
+    {
+        $this->headers->setCookie('foo', 'bar');
+        $this->headers->setHeader('content-type', 'text/plain');
+        $this->assertTrue($this->headers->hasCookies());
+        $this->assertTrue($this->headers->hasHeader('content-type'));
+
+        $this->headers->unsetHeaders();
+
+        $this->assertFalse($this->headers->hasCookies());
+        $this->assertFalse($this->headers->hasHeader('content-type'));
+        $this->assertFalse($this->headers->hasHeader('set-cookie'));
+    }
+
+    public function testGetHeadersIncludesCookiesAsStrings() : void
+    {
+        $this->headers->setCookie('foo', 'bar');
+        $this->headers->setCookie('baz', 'qux');
+
+        $headers = $this->headers->getHeaders();
+        $this->assertArrayHasKey('set-cookie', $headers);
+
+        $this->assertSame(
+            $this->headers->getCookiesAsStrings(),
+            $headers['set-cookie'],
+        );
+    }
+
+    public function testHasHeaderSetCookieReturnsTrueWhenCookiesSet() : void
+    {
+        $this->assertFalse($this->headers->hasHeader('set-cookie'));
+        $this->headers->setCookie('foo', 'bar');
+        $this->assertTrue($this->headers->hasHeader('set-cookie'));
+    }
+
     public function testInvalidField() : void
     {
         $this->expectException(ResponseException::class);

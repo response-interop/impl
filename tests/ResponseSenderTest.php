@@ -85,6 +85,30 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
         $this->assertBody($expect);
     }
 
+    public function testNegativeLengthThrows() : void
+    {
+        $resource = fopen('php://memory', 'rb+');
+
+        if ($resource === false) {
+            $this->fail('Could not open php://memory.');
+        }
+
+        $this->expectException(ResponseException::class);
+        $this->responseSender->sendResponseBodyResource($resource, length: -1);
+    }
+
+    public function testNegativeOffsetThrows() : void
+    {
+        $resource = fopen('php://memory', 'rb+');
+
+        if ($resource === false) {
+            $this->fail('Could not open php://memory.');
+        }
+
+        $this->expectException(ResponseException::class);
+        $this->responseSender->sendResponseBodyResource($resource, offset: -1);
+    }
+
     /**
      * @param mixed[] $expect
      */
