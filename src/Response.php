@@ -7,7 +7,6 @@ use ResponseInterop\Interface\ResponseBodyHandler;
 use ResponseInterop\Interface\ResponseHeadersCollection;
 use ResponseInterop\Interface\ResponseStruct;
 use ResponseInterop\Interface\ResponseTypeAliases;
-use StreamInterop\Interface\ResourceStream;
 use Stringable;
 
 /**

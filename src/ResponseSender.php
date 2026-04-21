@@ -4,11 +4,12 @@ declare(strict_types=1);
 namespace ResponseInterop\Impl;
 
 use ResponseInterop\Interface\ResponseBodyHandler;
+use ResponseInterop\Interface\ResponseBodySenderService;
 use ResponseInterop\Interface\ResponseSenderService;
 use ResponseInterop\Interface\ResponseStruct;
 use Stringable;
 
-class ResponseSender implements ResponseSenderService
+class ResponseSender implements ResponseSenderService, ResponseBodySenderService
 {
     /**
      * @var resource
@@ -45,10 +46,7 @@ class ResponseSender implements ResponseSenderService
 
         foreach ($response->headers->getHeaders() as $field => $values) {
             foreach ((array) $values as $value) {
-                $this->sendResponseHeader(
-                    "{$field}: {$value}",
-                    replace: false
-                );
+                $this->sendResponseHeader("{$field}: {$value}", replace: false);
             }
         }
 
@@ -65,7 +63,7 @@ class ResponseSender implements ResponseSenderService
     protected function sendResponseHeader(
         string $header,
         bool $replace = true,
-        int $statusCode = 0
+        int $statusCode = 0,
     ) : void
     {
         header($header, $replace, $statusCode);
@@ -88,7 +86,19 @@ class ResponseSender implements ResponseSenderService
         ?int $offset = null,
     ) : int
     {
+        if ($length !== null && $length < 0) {
+            throw new ResponseException(
+                "Length must not be negative, actually {$length}.",
+            );
+        }
+
         if ($offset !== null) {
+            if ($offset < 0) {
+                throw new ResponseException(
+                    "Offset must not be negative, actually {$offset}.",
+                );
+            }
+
             $this->seek($content, $offset);
         }
 
@@ -96,7 +106,7 @@ class ResponseSender implements ResponseSenderService
 
         if ($bytes === false) {
             throw new ResponseException(
-                "Could not write content resource to response resource."
+                "Could not write content resource to response resource.",
             );
         }
 
@@ -112,7 +122,7 @@ class ResponseSender implements ResponseSenderService
 
         if ($result === -1) {
             throw new ResponseException(
-                "Could not seek to {$offset} on content resource."
+                "Could not seek to {$offset} on content resource.",
             );
         }
     }

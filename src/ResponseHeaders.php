@@ -98,7 +98,7 @@ class ResponseHeaders implements ResponseHeadersCollection
          *     |response_header_value_string
          *     |array<response_header_value_string>
          */
-        $value = match(count($values)) {
+        $value = match (count($values)) {
             0 => null,
             1 => $values[key($values)],
             default => $values,
@@ -249,9 +249,9 @@ class ResponseHeaders implements ResponseHeadersCollection
     {
         $field = strtolower($field);
 
-        if (! preg_match('/^:?[a-z][a-z0-9-]+$/', $field)) {
+        if (! preg_match('/^:?[a-z_][a-z0-9_-]*$/', $field)) {
             throw new ResponseException(
-                "Header field name '{$field}' contains invalid characters, or is empty."
+                "Header field name '{$field}' contains invalid characters, or is empty.",
             );
         }
     }
@@ -259,7 +259,9 @@ class ResponseHeaders implements ResponseHeadersCollection
     protected function assertNotBlank(string $string) : void
     {
         if (trim($string) === '') {
-            throw new ResponseException("Expected non-blank string, actually blank.");
+            throw new ResponseException(
+                "Expected non-blank string, actually blank.",
+            );
         }
     }
 
@@ -268,12 +270,12 @@ class ResponseHeaders implements ResponseHeadersCollection
      */
     protected function retainCookie(string $setCookieString) : void
     {
-        $cookie = $this->cookieHelper->parseResponseCookieString(
-            $setCookieString,
-        );
+        $cookie = $this->cookieHelper->parseResponseCookieString($setCookieString);
 
         if ($cookie === null) {
-            throw new ResponseException("Could not parse set-cookie string: '{$setCookieString}'");
+            throw new ResponseException(
+                "Could not parse set-cookie string: '{$setCookieString}'",
+            );
         }
 
         $this->fields['set-cookie'][$cookie['name']] = $setCookieString;

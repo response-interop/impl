@@ -143,7 +143,7 @@ class ResponseCookieHelper implements ResponseCookieHelperService
                 $value = true;
             }
 
-            $attributes[$name] = $value;
+            $attributes[strtolower($name)] = $value;
 
             // 7.  Return to Step 1 of this algorithm.
         }

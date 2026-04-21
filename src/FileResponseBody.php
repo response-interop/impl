@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace ResponseInterop\Impl;
 
 use ResponseInterop\Interface\ResponseBodyHandler;
-use ResponseInterop\Interface\ResponseSenderService;
+use ResponseInterop\Interface\ResponseBodySenderService;
 use ResponseInterop\Interface\ResponseStruct;
 use ResponseInterop\Interface\ResponseTypeAliases;
 use SplFileObject;
@@ -34,23 +34,20 @@ class FileResponseBody implements ResponseBodyHandler
      */
     public function prepareResponse(ResponseStruct $response) : void
     {
-        $response->headers->setHeader(
-            'content-type',
-            $this->type ?? 'application/octet-stream',
-        );
+        $response->headers
+            ->setHeader('content-type', $this->type ?? 'application/octet-stream');
 
-        $response->headers->setHeader(
-            'content-transfer-encoding',
-            $this->encoding ?? 'binary',
-        );
+        $response->headers
+            ->setHeader('content-transfer-encoding', $this->encoding ?? 'binary');
 
         $disposition = $this->disposition ?? 'attachment';
         $filename = rawurlencode($this->filename ?? $this->file->getFilename());
 
-        $response->headers->setHeader(
-            'content-disposition',
-            "{$disposition}; filename=\"{$filename}\"",
-        );
+        $response->headers
+            ->setHeader(
+                'content-disposition',
+                "{$disposition}; filename=\"{$filename}\"",
+            );
 
         $size = (string) $this->file->getSize();
 
@@ -62,11 +59,11 @@ class FileResponseBody implements ResponseBodyHandler
     /**
      * @inheritdoc
      */
-    public function sendResponseBody(ResponseSenderService $sender) : void
+    public function sendResponseBody(ResponseBodySenderService $bodySender) : void
     {
         $content = fopen($this->file->getPathName(), 'rb');
         assert(is_resource($content));
-        $sender->sendResponseBodyResource($content);
+        $bodySender->sendResponseBodyResource($content);
         fclose($content);
     }
 }

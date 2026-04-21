@@ -14,7 +14,7 @@
         }
     ],
     "require": {
-        "php": "^8.4",
+        "php": ">=8.4",
         "response-interop/interface": "1.x@dev"
     },
     "autoload": {
