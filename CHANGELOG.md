@@ -10,6 +10,7 @@
 - Drop unused `StreamInterop` import in `Response`.
 - Require `php >=8.4` (was `^8.4`).
 - Add `pmjones/php-styler`; composer scripts `cs-fix`, `cs-check`, `cs-clear`; style check wired into `check`.
+- Expand README with install, usage, and class ↔ interface mapping.
 
 ## 1.0.0-dev1
 
