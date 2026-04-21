@@ -9,7 +9,11 @@ use ResponseInterop\Interface\ResponseStruct;
 
 class JsonResponseBody implements ResponseBodyHandler
 {
-    public const int DEFAULT_FLAGS = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_THROW_ON_ERROR;
+    public const int DEFAULT_FLAGS = JSON_HEX_TAG
+        | JSON_HEX_APOS
+        | JSON_HEX_AMP
+        | JSON_HEX_QUOT
+        | JSON_THROW_ON_ERROR;
 
     /**
      * @param ?non-empty-string $type
