@@ -44,14 +44,12 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->headers->hasCookies());
         $this->assertFalse($this->headers->hasCookie('foo'));
 
-        $this->headers->setCookie(
-            name: 'foo',
-            value: 'bar',
-            attributes: [
-                'secure' => true,
-                'samesite' => 'lax',
-            ]
-        );
+        $this->headers
+            ->setCookie(
+                name: 'foo',
+                value: 'bar',
+                attributes: ['secure' => true, 'samesite' => 'lax'],
+            );
 
         $this->assertTrue($this->headers->hasCookies());
         $this->assertTrue($this->headers->hasCookie('foo'));
@@ -59,16 +57,10 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         $expectArray = [
             'name' => 'foo',
             'value' => 'bar',
-            'attributes' => [
-                'secure' => true,
-                'samesite' => 'lax',
-            ],
+            'attributes' => ['secure' => true, 'samesite' => 'lax'],
         ];
 
-        $this->assertSame(
-            $expectArray,
-            $this->headers->getCookieAsArray('foo')
-        );
+        $this->assertSame($expectArray, $this->headers->getCookieAsArray('foo'));
 
         $this->assertSame(
             ['foo' => $expectArray],
@@ -77,20 +69,14 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
 
         $expectString = 'foo=bar; secure; samesite=lax';
 
-        $this->assertSame(
-            $expectString,
-            $this->headers->getCookieAsString('foo'),
-        );
+        $this->assertSame($expectString, $this->headers->getCookieAsString('foo'));
 
         $this->assertSame(
             ['foo' => $expectString],
             $this->headers->getCookiesAsStrings(),
         );
 
-        $this->assertSame(
-            $expectString,
-            $this->headers->getHeader('set-cookie'),
-        );
+        $this->assertSame($expectString, $this->headers->getHeader('set-cookie'));
 
         $this->assertSame(
             ['set-cookie' => $expectString],
@@ -116,16 +102,10 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         $expectArray = [
             'name' => 'foo',
             'value' => 'bar',
-            'attributes' => [
-                'secure' => true,
-                'samesite' => 'lax',
-            ],
+            'attributes' => ['secure' => true, 'samesite' => 'lax'],
         ];
 
-        $this->assertSame(
-            $expectArray,
-            $this->headers->getCookieAsArray('foo')
-        );
+        $this->assertSame($expectArray, $this->headers->getCookieAsArray('foo'));
 
         $this->assertSame(
             ['foo' => $expectArray],
@@ -134,20 +114,14 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
 
         $expectString = 'foo=bar; secure; samesite=lax';
 
-        $this->assertSame(
-            $expectString,
-            $this->headers->getCookieAsString('foo'),
-        );
+        $this->assertSame($expectString, $this->headers->getCookieAsString('foo'));
 
         $this->assertSame(
             ['foo' => $expectString],
             $this->headers->getCookiesAsStrings(),
         );
 
-        $this->assertSame(
-            $expectString,
-            $this->headers->getHeader('set-cookie'),
-        );
+        $this->assertSame($expectString, $this->headers->getHeader('set-cookie'));
 
         $this->assertSame(
             ['set-cookie' => $expectString],
@@ -157,10 +131,7 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         $this->headers->addHeader('set-cookie', 'bar=baz');
 
         $this->assertSame(
-            [
-                'foo' => $expectString,
-                'bar' => 'bar=baz'
-            ],
+            ['foo' => $expectString, 'bar' => 'bar=baz'],
             $this->headers->getCookiesAsStrings(),
         );
 

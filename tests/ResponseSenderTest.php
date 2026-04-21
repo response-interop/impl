@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace ResponseInterop\Impl;
 
 use SplFileObject;
-use StreamInterop\Interface\ResourceStream;
 
 class ResponseSenderTest extends \PHPUnit\Framework\TestCase
 {
