@@ -62,6 +62,15 @@ class ResponseCookieHelperTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testParseHandlesAdjacentSemicolons() : void
+    {
+        $parsed = $this->helper->parseResponseCookieString('foo=bar;; secure');
+
+        $this->assertNotNull($parsed);
+
+        $this->assertSame(['secure' => true], $parsed['attributes']);
+    }
+
     public function testParseReturnsNullForMissingEquals() : void
     {
         $this->assertNull(

@@ -6,12 +6,8 @@ namespace ResponseInterop\Impl;
 use ResponseInterop\Interface\ResponseBodyHandler;
 use ResponseInterop\Interface\ResponseHeadersCollection;
 use ResponseInterop\Interface\ResponseStruct;
-use ResponseInterop\Interface\ResponseTypeAliases;
 use Stringable;
 
-/**
- * @phpstan-import-type response_status_code_int from ResponseTypeAliases
- */
 class Response implements ResponseStruct
 {
     public function __construct(

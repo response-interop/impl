@@ -109,6 +109,42 @@ class ResponseSenderTest extends \PHPUnit\Framework\TestCase
         $this->responseSender->sendResponseBodyResource($resource, offset: -1);
     }
 
+    public function testZeroLengthSendsNothing() : void
+    {
+        $resource = fopen('php://memory', 'rb+');
+
+        if ($resource === false) {
+            $this->fail('Could not open php://memory.');
+        }
+
+        fwrite($resource, 'HELLO WORLD');
+        rewind($resource);
+
+        $bytes = $this->responseSender
+            ->sendResponseBodyResource($resource, length: 0);
+
+        $this->assertSame(0, $bytes);
+        $this->assertBody('');
+    }
+
+    public function testOffsetAndLengthSendPartial() : void
+    {
+        $resource = fopen('php://memory', 'rb+');
+
+        if ($resource === false) {
+            $this->fail('Could not open php://memory.');
+        }
+
+        fwrite($resource, 'HELLO WORLD');
+        rewind($resource);
+
+        $bytes = $this->responseSender
+            ->sendResponseBodyResource($resource, length: 5, offset: 6);
+
+        $this->assertSame(5, $bytes);
+        $this->assertBody('WORLD');
+    }
+
     /**
      * @param mixed[] $expect
      */

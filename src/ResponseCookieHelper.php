@@ -104,7 +104,7 @@ class ResponseCookieHelper implements ResponseCookieHelperService
             // character:
             $semicolonPos = strpos($unparsedAttributes, ';');
 
-            if ($semicolonPos) {
+            if ($semicolonPos !== false) {
                 // Consume the characters of the unparsed-attributes up to, but
                 // not including, the first %x3B (";") character.
                 $consumed = substr($unparsedAttributes, 0, $semicolonPos);
@@ -141,6 +141,11 @@ class ResponseCookieHelper implements ResponseCookieHelperService
                 // (Response-Interop specifies that if the cookie has no
                 // `=<attribute-value>` portion, retain it as boolean `true`.)
                 $value = true;
+            }
+
+            // Skip empty attribute names (e.g. from adjacent semicolons).
+            if ($name === '') {
+                continue;
             }
 
             $attributes[strtolower($name)] = $value;

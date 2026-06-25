@@ -166,6 +166,17 @@ class ResponseHeadersTest extends \PHPUnit\Framework\TestCase
         );
     }
 
+    public function testGetHeaderSetCookieReturnsNameKeyedArrayForMultiple() : void
+    {
+        $this->headers->setCookie('foo', 'bar');
+        $this->headers->setCookie('baz', 'qux');
+
+        $this->assertSame(
+            $this->headers->getCookiesAsStrings(),
+            $this->headers->getHeader('set-cookie'),
+        );
+    }
+
     public function testHasHeaderSetCookieReturnsTrueWhenCookiesSet() : void
     {
         $this->assertFalse($this->headers->hasHeader('set-cookie'));
