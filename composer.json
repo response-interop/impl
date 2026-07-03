@@ -15,7 +15,7 @@
     ],
     "require": {
         "php": ">=8.4",
-        "response-interop/interface": "1.x@dev"
+        "response-interop/interface": "^1.0"
     },
     "autoload": {
         "psr-4" : {
@@ -42,11 +42,5 @@
         "cs-fix": "./vendor/bin/php-styler apply",
         "test": "./vendor/bin/phpunit",
         "test-coverage": "./vendor/bin/phpunit --coverage-html=./tmp/coverage"
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../interface"
-        }
-    ]
+    }
 }
